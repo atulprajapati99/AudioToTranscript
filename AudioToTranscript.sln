@@ -1,0 +1,30 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioToTranscript", "AudioToTranscript.csproj", "{2E48F51A-5150-891F-B6F9-816BD41EBFEA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioToTranscript.Tests", "AudioToTranscript.Tests\AudioToTranscript.Tests.csproj", "{938DDC13-D6E6-DF52-946B-92130E35CFFB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2E48F51A-5150-891F-B6F9-816BD41EBFEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E48F51A-5150-891F-B6F9-816BD41EBFEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E48F51A-5150-891F-B6F9-816BD41EBFEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E48F51A-5150-891F-B6F9-816BD41EBFEA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{938DDC13-D6E6-DF52-946B-92130E35CFFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{938DDC13-D6E6-DF52-946B-92130E35CFFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{938DDC13-D6E6-DF52-946B-92130E35CFFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{938DDC13-D6E6-DF52-946B-92130E35CFFB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5DF4F17D-512F-4931-B2ED-EB554770A610}
+	EndGlobalSection
+EndGlobal

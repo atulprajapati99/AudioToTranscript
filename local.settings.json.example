@@ -1,0 +1,39 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "QUEUE_NAME": "audio-processing-queue",
+    "BLOB_CONTAINER_MEDIA": "media",
+    "TABLE_AUDIT_LOG": "AudioProcessingLog",
+    "ENVIRONMENT": "sandbox",
+
+    "Pipeline:EnableBlobStorage": "true",
+    "Pipeline:EnableTranscription": "true",
+    "Pipeline:EnableSalesforce": "true",
+    "Pipeline:EnableEmail": "true",
+    "Pipeline:EmailOnSuccess": "true",
+    "Pipeline:EmailOnFailure": "true",
+    "Pipeline:TranscriptionEndpoint": "https://your-transcription-url/transcribe",
+    "Pipeline:TranscriptionApiKey": "your-key-here",
+    "Pipeline:TranscriptionMaxRetries": "3",
+    "Pipeline:TranscriptionRetryBaseMs": "2000",
+    "Pipeline:MinTranscriptionConfidence": "0.0",
+    "Pipeline:SalesforceMaxRetries": "3",
+    "Pipeline:SalesforceRetryBaseMs": "2000",
+    "Pipeline:AuditRetentionDays": "30",
+
+    "Salesforce:ClientId": "your-sf-client-id",
+    "Salesforce:ClientSecret": "your-sf-client-secret",
+    "Salesforce:TokenUrl": "https://login.salesforce.com/services/oauth2/token",
+    "Salesforce:InstanceUrl": "https://yourorg.sandbox.my.salesforce.com",
+    "Salesforce:RecordTypeId": "01217U000000GjgQAG",
+    "Salesforce:DefaultOwnerId": "",
+
+    "Email:SmtpHost": "smtp.office365.com",
+    "Email:SmtpPort": "587",
+    "Email:Username": "RCCBAutomate@reyesccb.com",
+    "Email:Password": "your-smtp-password",
+    "Email:Recipients": "team@reyesccb.com"
+  }
+}

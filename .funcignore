@@ -1,0 +1,6 @@
+AudioToTranscript.Tests/
+*.md
+.git/
+.gitignore
+.vs/
+TestResults/

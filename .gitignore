@@ -1,0 +1,20 @@
+## Azure Functions
+bin/
+obj/
+local.settings.json
+.python_packages/
+
+## .NET
+*.user
+*.suo
+.vs/
+TestResults/
+*.nupkg
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Environment
+.env
+*.env

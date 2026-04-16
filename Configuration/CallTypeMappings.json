@@ -1,0 +1,19 @@
+{
+  "CallTypeMappings": {
+    "D|FR":                         { "CallType": "Delivery / Order Related",     "ProblemType": "Fill Request" },
+    "S|CV":                         { "CallType": "Sales Requests / Questions",   "ProblemType": "Customer Requests Visit" },
+    "S|FO":                         { "CallType": "Sales Requests / Questions",   "ProblemType": "Customer Requests Visit" },
+    "D|DD":                         { "CallType": "Delivery / Order Related",     "ProblemType": "Update Delivery Day/Change" },
+    "F|IS":                         { "CallType": "Financial / Order Related",    "ProblemType": "Invoice/Statement Copy" },
+    "F|ST":                         { "CallType": "Financial / Sales Tax",        "ProblemType": "" },
+    "FeedBack|CallCenterFeedback":  { "CallType": "Feedback on Bottler Employee", "ProblemType": "Call Center Feedback" },
+    "FeedBack|SalesRepFeedback":    { "CallType": "Feedback on Bottler Employee", "ProblemType": "Sales Rep Feedback" },
+    "FeedBack|DriverFeedback":      { "CallType": "Feedback on Bottler Employee", "ProblemType": "Driver Feedback" },
+    "FeedBack|MerchandiserFeedback":{ "CallType": "Feedback on Bottler Employee", "ProblemType": "Merchandiser Feedback" },
+    "FeedBack|BottlerFeedback":     { "CallType": "Feedback on Bottler Employee", "ProblemType": "Other Feedback" },
+    "FeedBack|ServiceTechFeedback": { "CallType": "Feedback on Bottler Employee", "ProblemType": "Service Tech Feedback" },
+    "S|TR":                         { "CallType": "Sales Requests / Questions",   "ProblemType": "Tumbler Request" },
+    "S|POS":                        { "CallType": "Sales Requests / Questions",   "ProblemType": "POS Request" },
+    "F|CT":                         { "CallType": "Financial / Contract Terms",   "ProblemType": "" }
+  }
+}
