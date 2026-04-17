@@ -1,11 +1,19 @@
 {
   "$schema": "http://json.schemastore.org/launchsettings.json",
   "profiles": {
-    "func start (attach debugger manually)": {
+    "func start": {
       "commandName": "Executable",
-      "executablePath": "func",
-      "commandLineArgs": "host start --port 7071 --dotnet-isolated-debug --pause-on-error",
-      "workingDirectory": "$(ProjectDir)",
+      "executablePath": "cmd",
+      "commandLineArgs": "/k func host start --port 7071 --pause-on-error",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "AZURE_FUNCTIONS_ENVIRONMENT": "Development"
+      }
+    },
+    "func start (debug)": {
+      "commandName": "Executable",
+      "executablePath": "cmd",
+      "commandLineArgs": "/k func host start --port 7071 --dotnet-isolated-debug --pause-on-error",
       "launchBrowser": false,
       "environmentVariables": {
         "AZURE_FUNCTIONS_ENVIRONMENT": "Development"
