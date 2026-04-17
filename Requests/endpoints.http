@@ -1,23 +1,20 @@
 ### AudioToTranscript – VS 2022 HTTP Client Tests
-### Open this file in VS 2022, click the green ▶ next to any request to run it.
-### Requires: func start running in a terminal + Azurite running
+###
+### BEFORE RUNNING:
+###   1. Run once:  .\TestData\New-TestWav.ps1   (creates TestData/test.wav)
+###   2. Terminal 1: azurite --location C:/azurite --loose
+###   3. Terminal 2: func start
+###   4. Click "Send Request" (▶) above any ### block below — do NOT press F5
 
-@baseUrl = http://localhost:7071
-@boundary = ----AudioTestBoundary
-
-# ──────────────────────────────────────────────
-# 1. Health check – does the host respond at all?
-# ──────────────────────────────────────────────
-### Health
-GET {{baseUrl}}/api/health
-
+@baseUrl  = http://localhost:7071
+@boundary = ----AudioTestBoundary7071
 
 # ──────────────────────────────────────────────
-# 2. POST /api/audio  (multipart: metadata + fake audio bytes)
-#    Pipeline:EnableBlobStorage=true, others=false in local.settings.json
-#    Expected: 202 Accepted  { "id": "...", "status": "queued" }
+# 1. POST /api/audio — real WAV file attached
+#    Expected: 202 Accepted  {"id":"...","status":"queued"}
 # ──────────────────────────────────────────────
-### Audio – D|FR (Fill Request)
+
+### Audio – D|FR Fill Request
 POST {{baseUrl}}/api/audio
 Content-Type: multipart/form-data; boundary={{boundary}}
 
@@ -30,7 +27,7 @@ Content-Type: application/json
 Content-Disposition: form-data; name="audio"; filename="test.wav"
 Content-Type: audio/wav
 
-RIFF$   WAVEfmt
+< ../TestData/test.wav
 --{{boundary}}--
 
 
@@ -44,14 +41,14 @@ Content-Type: application/json
 
 {"callType":"FeedBack|DriverFeedback","caseId":"TEST-002","phone":"5551234567","timestamp":"1745000001000","brandId":"4600"}
 --{{boundary}}
-Content-Disposition: form-data; name="audio"; filename="feedback.wav"
+Content-Disposition: form-data; name="audio"; filename="test.wav"
 Content-Type: audio/wav
 
-RIFF$   WAVEfmt
+< ../TestData/test.wav
 --{{boundary}}--
 
 
-### Audio – unknown callType (should return 202 + log warning)
+### Audio – S|TR Tumbler Request
 POST {{baseUrl}}/api/audio
 Content-Type: multipart/form-data; boundary={{boundary}}
 
@@ -59,37 +56,55 @@ Content-Type: multipart/form-data; boundary={{boundary}}
 Content-Disposition: form-data; name="metadata"
 Content-Type: application/json
 
-{"callType":"UNKNOWN|CODE","caseId":"TEST-003","phone":"5559999999","timestamp":"1745000002000","brandId":"4600"}
---{{boundary}}
-Content-Disposition: form-data; name="audio"; filename="unknown.wav"
-Content-Type: audio/wav
-
-RIFF$   WAVEfmt
---{{boundary}}--
-
-
-### Audio – missing required field (should return 400)
-POST {{baseUrl}}/api/audio
-Content-Type: multipart/form-data; boundary={{boundary}}
-
---{{boundary}}
-Content-Disposition: form-data; name="metadata"
-Content-Type: application/json
-
-{"callType":"D|FR","phone":"9794920458"}
+{"callType":"S|TR","caseId":"TEST-003","phone":"5559876543","timestamp":"1745000002000","brandId":"4600"}
 --{{boundary}}
 Content-Disposition: form-data; name="audio"; filename="test.wav"
 Content-Type: audio/wav
 
-RIFF$   WAVEfmt
+< ../TestData/test.wav
+--{{boundary}}--
+
+
+### Audio – unknown callType (expect 202 + warning in func log)
+POST {{baseUrl}}/api/audio
+Content-Type: multipart/form-data; boundary={{boundary}}
+
+--{{boundary}}
+Content-Disposition: form-data; name="metadata"
+Content-Type: application/json
+
+{"callType":"UNKNOWN|CODE","caseId":"TEST-004","phone":"5550000000","timestamp":"1745000003000","brandId":"4600"}
+--{{boundary}}
+Content-Disposition: form-data; name="audio"; filename="test.wav"
+Content-Type: audio/wav
+
+< ../TestData/test.wav
+--{{boundary}}--
+
+
+### Audio – missing caseId (expect 400 Bad Request)
+POST {{baseUrl}}/api/audio
+Content-Type: multipart/form-data; boundary={{boundary}}
+
+--{{boundary}}
+Content-Disposition: form-data; name="metadata"
+Content-Type: application/json
+
+{"callType":"D|FR","phone":"9794920458","timestamp":"1745000004000","brandId":"4600"}
+--{{boundary}}
+Content-Disposition: form-data; name="audio"; filename="test.wav"
+Content-Type: audio/wav
+
+< ../TestData/test.wav
 --{{boundary}}--
 
 
 # ──────────────────────────────────────────────
-# 3. POST /api/image  (needs Pipeline:EnableTranscription=true + real endpoint)
-#    Expected: 200 OK  { "text": "...", "confidence": 0.97 }
+# 2. POST /api/image
+#    Needs Pipeline:EnableTranscription=true + real transcription URL
 # ──────────────────────────────────────────────
-### Image – placeholder (update when transcription URL is available)
+
+### Image – (enable transcription in local.settings.json first)
 POST {{baseUrl}}/api/image
 Content-Type: multipart/form-data; boundary={{boundary}}
 
@@ -97,5 +112,5 @@ Content-Type: multipart/form-data; boundary={{boundary}}
 Content-Disposition: form-data; name="image"; filename="invoice.jpg"
 Content-Type: image/jpeg
 
-<fake-jpeg-bytes>
+< ../TestData/test.wav
 --{{boundary}}--
