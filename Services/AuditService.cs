@@ -18,11 +18,11 @@ public class AuditService : IAuditService
         var connStr   = config.GetValue<string>("AzureWebJobsStorage")!;
         var tableName = config.GetValue<string>("TABLE_AUDIT_LOG") ?? "AudioProcessingLog";
         _table = new TableClient(connStr, tableName);
-        _table.CreateIfNotExists();
     }
 
     public async Task CreateInitialRowAsync(AudioMetadata metadata)
     {
+        await _table.CreateIfNotExistsAsync();
         var retainUntil = DateTime.UtcNow.AddDays(_retentionDays).ToString("yyyy-MM-dd");
         var entity = new TableEntity(metadata.DatePartition, metadata.CaseId)
         {

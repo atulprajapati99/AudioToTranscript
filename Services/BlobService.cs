@@ -17,11 +17,11 @@ public class BlobService : IBlobService
         var connStr       = config.GetValue<string>("AzureWebJobsStorage")!;
         var containerName = config.GetValue<string>("BLOB_CONTAINER_MEDIA") ?? "media";
         _container = new BlobContainerClient(connStr, containerName);
-        _container.CreateIfNotExists(PublicAccessType.None);
     }
 
     public async Task<string> UploadMediaAsync(byte[] mediaBytes, string blobPath, string contentType)
     {
+        await _container.CreateIfNotExistsAsync(PublicAccessType.None);
         var client = _container.GetBlobClient(blobPath);
         using var stream = new MemoryStream(mediaBytes);
         await client.UploadAsync(stream, new BlobUploadOptions { HttpHeaders = new BlobHttpHeaders { ContentType = contentType } });

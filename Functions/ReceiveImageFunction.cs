@@ -33,7 +33,7 @@ public class ReceiveImageFunction
 
     [Function("ReceiveImage")]
     public async Task<HttpResponseData> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "image")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "image")] HttpRequestData req)
     {
         var contentType = req.Headers.TryGetValues("Content-Type", out var ctValues)
             ? ctValues.First() : "";

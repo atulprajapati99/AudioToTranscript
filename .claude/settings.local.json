@@ -5,7 +5,11 @@
       "Bash(dotnet test *)",
       "Bash(winget show *)",
       "Bash(func --version)",
-      "Bash(where func *)"
+      "Bash(where func *)",
+      "Bash(powershell -ExecutionPolicy Bypass -File \"TestData/New-TestWav.ps1\")",
+      "Bash(az --version)",
+      "Bash(where az *)",
+      "Bash(powershell -ExecutionPolicy Bypass -File \"TestData/New-AzuriteResources.ps1\")"
     ]
   }
 }

@@ -24,12 +24,11 @@ public class ReplayFunction
         var connStr   = config.GetValue<string>("AzureWebJobsStorage")!;
         var queueName = config.GetValue<string>("QUEUE_NAME") ?? "audio-processing-queue";
         _queue = new QueueClient(connStr, queueName);
-        _queue.CreateIfNotExists();
     }
 
     [Function("Replay")]
     public async Task<HttpResponseData> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "replay")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "replay")] HttpRequestData req)
     {
         ReplayRequest? body;
         try
@@ -65,6 +64,7 @@ public class ReplayFunction
         var messageJson    = JsonSerializer.Serialize(message);
         var encoded        = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(messageJson));
 
+        await _queue.CreateIfNotExistsAsync();
         await _queue.SendMessageAsync(encoded);
 
         _logger.LogInformation("Replay queued for CaseId={CaseId} BlobPath={Path}", body.CaseId, body.BlobPath);

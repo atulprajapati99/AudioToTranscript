@@ -39,12 +39,11 @@ public class ReceiveAudioFunction
         var connStr   = config.GetValue<string>("AzureWebJobsStorage")!;
         var queueName = config.GetValue<string>("QUEUE_NAME") ?? "audio-processing-queue";
         _queue = new QueueClient(connStr, queueName);
-        _queue.CreateIfNotExists();
     }
 
     [Function("ReceiveAudio")]
     public async Task<HttpResponseData> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "audio")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "audio")] HttpRequestData req)
     {
         _logger.LogInformation("ReceiveAudio triggered. ContentType={CT}", req.Headers.TryGetValues("Content-Type", out var ct) ? string.Join(",", ct) : "none");
 
@@ -119,6 +118,7 @@ public class ReceiveAudioFunction
         var message = new ProcessingMessage { BlobPath = metadata.BlobPath, Metadata = metadata };
         var messageJson = JsonSerializer.Serialize(message);
         var encoded = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(messageJson));
+        await _queue.CreateIfNotExistsAsync();
         await _queue.SendMessageAsync(encoded);
 
         _logger.LogInformation("CaseId={CaseId} queued for processing. BlobPath={Path}", metadata.CaseId, metadata.BlobPath);
