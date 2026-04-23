@@ -9,11 +9,6 @@
 @baseUrl  = http://localhost:7071
 @boundary = ----AudioTestBoundary7071
 
-# ──────────────────────────────────────────────
-# 1. POST /api/audio — real WAV file attached
-#    Expected: 202 Accepted  {"id":"...","status":"queued"}
-# ──────────────────────────────────────────────
-
 ### Audio – D|FR Fill Request
 POST {{baseUrl}}/api/audio
 Content-Type: multipart/form-data; boundary={{boundary}}

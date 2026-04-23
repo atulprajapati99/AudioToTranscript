@@ -45,8 +45,7 @@ public class ProcessAudioFunction
         ProcessingMessage? message;
         try
         {
-            var decoded = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(messageJson));
-            message = JsonSerializer.Deserialize<ProcessingMessage>(decoded,
+            message = JsonSerializer.Deserialize<ProcessingMessage>(messageJson,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
         catch (Exception ex)

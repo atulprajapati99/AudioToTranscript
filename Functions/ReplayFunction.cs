@@ -23,7 +23,8 @@ public class ReplayFunction
         _logger = logger;
         var connStr   = config.GetValue<string>("AzureWebJobsStorage")!;
         var queueName = config.GetValue<string>("QUEUE_NAME") ?? "audio-processing-queue";
-        _queue = new QueueClient(connStr, queueName);
+        _queue = new QueueClient(connStr, queueName,
+            new QueueClientOptions { MessageEncoding = QueueMessageEncoding.None });
     }
 
     [Function("Replay")]
@@ -60,12 +61,10 @@ public class ReplayFunction
             ReceivedAt     = DateTime.UtcNow.ToString("O")
         };
 
-        var message        = new ProcessingMessage { BlobPath = body.BlobPath, Metadata = metadata };
-        var messageJson    = JsonSerializer.Serialize(message);
-        var encoded        = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(messageJson));
-
+        var message     = new ProcessingMessage { BlobPath = body.BlobPath, Metadata = metadata };
+        var messageJson = JsonSerializer.Serialize(message);
         await _queue.CreateIfNotExistsAsync();
-        await _queue.SendMessageAsync(encoded);
+        await _queue.SendMessageAsync(messageJson);
 
         _logger.LogInformation("Replay queued for CaseId={CaseId} BlobPath={Path}", body.CaseId, body.BlobPath);
 

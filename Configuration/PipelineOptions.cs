@@ -11,6 +11,8 @@ public class PipelineOptions
 
     public string TranscriptionEndpoint       { get; set; } = "";
     public string TranscriptionApiKey         { get; set; } = "";
+    public string TranscriptionApiKeyHeader   { get; set; } = "Ocp-Apim-Subscription-Key";
+    public string TranscriptionContentType    { get; set; } = "audio/wav; codec=audio/pcm; samplerate=8000";
     public int    TranscriptionMaxRetries     { get; set; } = 3;
     public int    TranscriptionRetryBaseMs    { get; set; } = 2000;
     public double MinTranscriptionConfidence  { get; set; } = 0.0;

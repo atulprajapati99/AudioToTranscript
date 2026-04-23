@@ -25,16 +25,22 @@ public class TranscriptionService : ITranscriptionService
         if (string.IsNullOrWhiteSpace(_options.TranscriptionEndpoint))
             throw new InvalidOperationException("Pipeline:TranscriptionEndpoint is not configured.");
 
+        var effectiveContentType = !string.IsNullOrWhiteSpace(_options.TranscriptionContentType)
+            ? _options.TranscriptionContentType
+            : contentType;
+
         using var content = new ByteArrayContent(mediaBytes);
-        content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+        content.Headers.TryAddWithoutValidation("Content-Type", effectiveContentType);
 
         using var request = new HttpRequestMessage(HttpMethod.Post, _options.TranscriptionEndpoint)
         {
             Content = content
         };
 
+        request.Headers.Add("Accept", "application/json");
+
         if (!string.IsNullOrWhiteSpace(_options.TranscriptionApiKey))
-            request.Headers.Add("Authorization", _options.TranscriptionApiKey);
+            request.Headers.Add(_options.TranscriptionApiKeyHeader, _options.TranscriptionApiKey);
 
         _logger.LogInformation("Calling transcription API. Bytes={Bytes} ContentType={ContentType}",
             mediaBytes.Length, contentType);

@@ -1,0 +1,85 @@
+name: Build, Test & Deploy — AudioToTranscript
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  FUNCTION_APP_NAME: 'func-audiotranscript-test'   # ← replace with your Azure Function App name
+  PROJECT_PATH: 'AudioToTranscript.csproj'
+  TESTS_PATH: 'AudioToTranscript.Tests/AudioToTranscript.Tests.csproj'
+  PUBLISH_DIR: './publish-output'
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.PROJECT_PATH }}
+
+      - name: Build (Release)
+        run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release --no-restore
+
+      - name: Restore test dependencies
+        run: dotnet restore ${{ env.TESTS_PATH }}
+
+      - name: Run unit tests
+        run: >
+          dotnet test ${{ env.TESTS_PATH }}
+          --configuration Release
+          --no-restore
+          --logger "trx;LogFileName=test-results.trx"
+          --results-directory ./TestResults
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: ./TestResults/*.trx
+
+      - name: Publish function app
+        run: >
+          dotnet publish ${{ env.PROJECT_PATH }}
+          --configuration Release
+          --output ${{ env.PUBLISH_DIR }}
+          --no-restore
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: function-app
+          path: ${{ env.PUBLISH_DIR }}
+
+  deploy:
+    name: Deploy to Azure
+    runs-on: windows-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: function-app
+          path: ${{ env.PUBLISH_DIR }}
+
+      - name: Deploy to Azure Function App
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ env.FUNCTION_APP_NAME }}
+          package: ${{ env.PUBLISH_DIR }}
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}

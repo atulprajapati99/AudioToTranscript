@@ -38,7 +38,8 @@ public class ReceiveAudioFunction
 
         var connStr   = config.GetValue<string>("AzureWebJobsStorage")!;
         var queueName = config.GetValue<string>("QUEUE_NAME") ?? "audio-processing-queue";
-        _queue = new QueueClient(connStr, queueName);
+        _queue = new QueueClient(connStr, queueName,
+            new QueueClientOptions { MessageEncoding = QueueMessageEncoding.None });
     }
 
     [Function("ReceiveAudio")]
@@ -117,9 +118,8 @@ public class ReceiveAudioFunction
         // Enqueue processing message
         var message = new ProcessingMessage { BlobPath = metadata.BlobPath, Metadata = metadata };
         var messageJson = JsonSerializer.Serialize(message);
-        var encoded = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(messageJson));
         await _queue.CreateIfNotExistsAsync();
-        await _queue.SendMessageAsync(encoded);
+        await _queue.SendMessageAsync(messageJson);
 
         _logger.LogInformation("CaseId={CaseId} queued for processing. BlobPath={Path}", metadata.CaseId, metadata.BlobPath);
 

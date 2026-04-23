@@ -4,3 +4,5 @@ AudioToTranscript.Tests/
 .gitignore
 .vs/
 TestResults/
+Properties/
+Docs/
