@@ -9,6 +9,7 @@ namespace AudioToTranscript.Utils;
 public static class MultipartParser
 {
     private static readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
+    private const int MaxAudioBytes = 2 * 1024 * 1024; // 2 MB — APIM transcription API hard limit
 
     /// <summary>
     /// Parses a multipart/form-data request body into an AudioMetadata and raw media bytes.
@@ -54,7 +55,16 @@ public static class MultipartParser
             {
                 fileName = disposition.FileName.Value?.Trim('"') ?? "";
                 using var ms = new MemoryStream();
-                await section.Body.CopyToAsync(ms);
+                var buffer = new byte[81920];
+                int bytesRead, totalRead = 0;
+                while ((bytesRead = await section.Body.ReadAsync(buffer)) > 0)
+                {
+                    totalRead += bytesRead;
+                    if (name.Equals("audio", StringComparison.OrdinalIgnoreCase) && totalRead > MaxAudioBytes)
+                        throw new AudioFileTooLargeException(
+                            $"Audio file exceeds the 2 MB maximum ({totalRead} bytes read).");
+                    await ms.WriteAsync(buffer.AsMemory(0, bytesRead));
+                }
                 mediaBytes = ms.ToArray();
             }
         }

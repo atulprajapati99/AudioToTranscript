@@ -77,6 +77,31 @@ public class MultipartParserTests
     }
 
     [Fact]
+    public async Task ParseAudioAsync_AudioExceeds2MB_ThrowsAudioFileTooLargeException()
+    {
+        var json = """{"callType":"D|FR","caseId":"001","phone":"123","timestamp":"1","brandId":"1"}""";
+        var oversizedAudio = new byte[2 * 1024 * 1024 + 1]; // 1 byte over 2 MB
+
+        var (body, ct) = BuildMultipart(json, oversizedAudio);
+        var act = async () => await MultipartParser.ParseAudioAsync(body, ct);
+
+        await act.Should().ThrowAsync<AudioFileTooLargeException>()
+            .WithMessage("*2 MB*");
+    }
+
+    [Fact]
+    public async Task ParseAudioAsync_AudioExactly2MB_Succeeds()
+    {
+        var json = """{"callType":"D|FR","caseId":"001","phone":"123","timestamp":"1","brandId":"1"}""";
+        var exactAudio = new byte[2 * 1024 * 1024]; // exactly 2 MB
+
+        var (body, ct) = BuildMultipart(json, exactAudio);
+        var act = async () => await MultipartParser.ParseAudioAsync(body, ct);
+
+        await act.Should().NotThrowAsync();
+    }
+
+    [Fact]
     public async Task ParseImageAsync_ValidRequest_ReturnsBytes()
     {
         var imageBytes = new byte[] { 0xFF, 0xD8, 0xFF }; // JPEG magic bytes

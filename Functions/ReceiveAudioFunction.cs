@@ -27,6 +27,7 @@ public class ReceiveAudioFunction
         IAuditService audit,
         ICallTypeMapper mapper,
         IOptions<PipelineOptions> options,
+        QueueServiceClient queueServiceClient,
         IConfiguration config,
         ILogger<ReceiveAudioFunction> logger)
     {
@@ -36,10 +37,8 @@ public class ReceiveAudioFunction
         _options = options.Value;
         _logger  = logger;
 
-        var connStr   = config.GetValue<string>("AzureWebJobsStorage")!;
         var queueName = config.GetValue<string>("QUEUE_NAME") ?? "audio-processing-queue";
-        _queue = new QueueClient(connStr, queueName,
-            new QueueClientOptions { MessageEncoding = QueueMessageEncoding.None });
+        _queue = queueServiceClient.GetQueueClient(queueName);
     }
 
     [Function("ReceiveAudio")]
@@ -65,6 +64,15 @@ public class ReceiveAudioFunction
         try
         {
             (metadata, mediaBytes, fileName) = await MultipartParser.ParseAudioAsync(req.Body, contentType);
+        }
+        catch (AudioFileTooLargeException ex)
+        {
+            _logger.LogWarning("Rejected oversized audio upload: {Message}", ex.Message);
+            var r413 = req.CreateResponse(HttpStatusCode.RequestEntityTooLarge);
+            r413.Headers.Add("Content-Type", "application/json");
+            await r413.WriteStringAsync(JsonSerializer.Serialize(new
+                { error = "Audio file exceeds the 2 MB maximum allowed by the transcription service." }));
+            return r413;
         }
         catch (Exception ex)
         {

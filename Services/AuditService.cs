@@ -11,13 +11,12 @@ public class AuditService : IAuditService
     private readonly ILogger<AuditService> _logger;
     private readonly int _retentionDays;
 
-    public AuditService(IConfiguration config, ILogger<AuditService> logger)
+    public AuditService(TableServiceClient tableServiceClient, IConfiguration config, ILogger<AuditService> logger)
     {
         _logger = logger;
         _retentionDays = config.GetValue<int>("Pipeline:AuditRetentionDays", 30);
-        var connStr   = config.GetValue<string>("AzureWebJobsStorage")!;
         var tableName = config.GetValue<string>("TABLE_AUDIT_LOG") ?? "AudioProcessingLog";
-        _table = new TableClient(connStr, tableName);
+        _table = tableServiceClient.GetTableClient(tableName);
     }
 
     public async Task CreateInitialRowAsync(AudioMetadata metadata)

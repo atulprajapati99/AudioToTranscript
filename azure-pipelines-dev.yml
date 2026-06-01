@@ -1,0 +1,109 @@
+trigger:
+  branches:
+    include:
+      - develop
+
+pr: none
+
+pool:
+  vmImage: windows-latest
+
+variables:
+  - group: audiotranscript-dev
+  - name: dotnetVersion
+    value: '8.0.x'
+  - name: projectPath
+    value: 'AudioToTranscript.csproj'
+  - name: testsPath
+    value: 'AudioToTranscript.Tests/AudioToTranscript.Tests.csproj'
+  - name: functionAppName
+    value: 'func-audiotranscript-dev'
+  - name: serviceConnection
+    value: 'AudioToTranscript-Dev-ServiceConnection'
+
+stages:
+
+  - stage: Build
+    displayName: 'Build & Test'
+    jobs:
+      - job: BuildAndTest
+        displayName: 'Restore, Build, Test, Publish'
+        steps:
+          - task: UseDotNet@2
+            displayName: 'Use .NET $(dotnetVersion)'
+            inputs:
+              version: $(dotnetVersion)
+              packageType: sdk
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Restore'
+            inputs:
+              command: restore
+              projects: $(projectPath)
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Build (Release)'
+            inputs:
+              command: build
+              projects: $(projectPath)
+              arguments: '--configuration Release --no-restore'
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Restore test project'
+            inputs:
+              command: restore
+              projects: $(testsPath)
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Run unit tests'
+            inputs:
+              command: test
+              projects: $(testsPath)
+              arguments: '--configuration Release --no-restore --logger trx --results-directory $(Agent.TempDirectory)/TestResults'
+            continueOnError: false
+
+          - task: PublishTestResults@2
+            displayName: 'Publish test results'
+            condition: always()
+            inputs:
+              testResultsFormat: VSTest
+              testResultsFiles: '$(Agent.TempDirectory)/TestResults/*.trx'
+              failTaskOnFailedTests: true
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Publish function app'
+            inputs:
+              command: publish
+              projects: $(projectPath)
+              arguments: '--configuration Release --no-restore --output $(Build.ArtifactStagingDirectory)/publish'
+              publishWebProjects: false
+              zipAfterPublish: true
+              modifyOutputPath: false
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish artifact: drop'
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)/publish'
+              ArtifactName: 'drop'
+              publishLocation: Container
+
+  - stage: DeployDev
+    displayName: 'Deploy to Dev'
+    dependsOn: Build
+    condition: succeeded()
+    jobs:
+      - deployment: DeployToDevFunctionApp
+        displayName: 'Deploy to $(functionAppName)'
+        environment: 'AudioToTranscript-Dev'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureFunctionApp@2
+                  displayName: 'Deploy Azure Function App'
+                  inputs:
+                    connectedServiceNameARM: $(serviceConnection)
+                    appType: functionApp
+                    appName: $(functionAppName)
+                    package: '$(Pipeline.Workspace)/drop/*.zip'
+                    deploymentMethod: zipDeploy

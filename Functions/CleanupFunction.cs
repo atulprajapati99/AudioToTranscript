@@ -13,12 +13,11 @@ public class CleanupFunction
     private readonly TableClient _table;
     private readonly ILogger<CleanupFunction> _logger;
 
-    public CleanupFunction(IConfiguration config, ILogger<CleanupFunction> logger)
+    public CleanupFunction(TableServiceClient tableServiceClient, IConfiguration config, ILogger<CleanupFunction> logger)
     {
         _logger = logger;
-        var connStr   = config.GetValue<string>("AzureWebJobsStorage")!;
         var tableName = config.GetValue<string>("TABLE_AUDIT_LOG") ?? "AudioProcessingLog";
-        _table = new TableClient(connStr, tableName);
+        _table = tableServiceClient.GetTableClient(tableName);
     }
 
     [Function("CleanupAuditLog")]

@@ -11,12 +11,11 @@ public class BlobService : IBlobService
     private readonly BlobContainerClient _container;
     private readonly ILogger<BlobService> _logger;
 
-    public BlobService(IConfiguration config, ILogger<BlobService> logger)
+    public BlobService(BlobServiceClient blobServiceClient, IConfiguration config, ILogger<BlobService> logger)
     {
         _logger = logger;
-        var connStr       = config.GetValue<string>("AzureWebJobsStorage")!;
         var containerName = config.GetValue<string>("BLOB_CONTAINER_MEDIA") ?? "media";
-        _container = new BlobContainerClient(connStr, containerName);
+        _container = blobServiceClient.GetBlobContainerClient(containerName);
     }
 
     public async Task<string> UploadMediaAsync(byte[] mediaBytes, string blobPath, string contentType)

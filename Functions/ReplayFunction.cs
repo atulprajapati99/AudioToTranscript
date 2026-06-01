@@ -18,13 +18,11 @@ public class ReplayFunction
     private readonly QueueClient _queue;
     private readonly ILogger<ReplayFunction> _logger;
 
-    public ReplayFunction(IConfiguration config, ILogger<ReplayFunction> logger)
+    public ReplayFunction(QueueServiceClient queueServiceClient, IConfiguration config, ILogger<ReplayFunction> logger)
     {
         _logger = logger;
-        var connStr   = config.GetValue<string>("AzureWebJobsStorage")!;
         var queueName = config.GetValue<string>("QUEUE_NAME") ?? "audio-processing-queue";
-        _queue = new QueueClient(connStr, queueName,
-            new QueueClientOptions { MessageEncoding = QueueMessageEncoding.None });
+        _queue = queueServiceClient.GetQueueClient(queueName);
     }
 
     [Function("Replay")]
