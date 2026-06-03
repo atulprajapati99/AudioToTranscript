@@ -1,9 +1,12 @@
 trigger:
   branches:
     include:
-      - develop
+      - main
 
-pr: none
+pr:
+  branches:
+    include:
+      - main
 
 pool:
   vmImage: windows-latest
@@ -21,13 +24,15 @@ variables:
   - name: serviceConnection
     value: 'AudioToTranscript-Dev-ServiceConnection'
 
+# ─────────────────────────────────────────────
+# Stage 1: CI — Build, Test, Publish Artifact
+# ─────────────────────────────────────────────
 stages:
-
-  - stage: Build
-    displayName: 'Build & Test'
+  - stage: CI
+    displayName: 'CI — Build & Test'
     jobs:
       - job: BuildAndTest
-        displayName: 'Restore, Build, Test, Publish'
+        displayName: 'Restore, Build, Test, Publish Artifact'
         steps:
           - task: UseDotNet@2
             displayName: 'Use .NET $(dotnetVersion)'
@@ -87,10 +92,14 @@ stages:
               ArtifactName: 'drop'
               publishLocation: Container
 
-  - stage: DeployDev
-    displayName: 'Deploy to Dev'
-    dependsOn: Build
-    condition: succeeded()
+# ─────────────────────────────────────────────
+# Stage 2: CD — Deploy to Dev
+# Runs only on pushes to main (not on PRs)
+# ─────────────────────────────────────────────
+  - stage: CD_Dev
+    displayName: 'CD — Deploy to Dev'
+    dependsOn: CI
+    condition: and(succeeded(), eq(variables['Build.Reason'], 'IndividualCI'))
     jobs:
       - deployment: DeployToDevFunctionApp
         displayName: 'Deploy to $(functionAppName)'
